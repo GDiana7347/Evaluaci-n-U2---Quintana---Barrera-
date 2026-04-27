@@ -1,12 +1,10 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { PacienteCrudComponent } from './components/paciente-crud.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [PacienteCrudComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
-  protected readonly title = signal('evu2-barrera-quintana');
-}
+export class App {}

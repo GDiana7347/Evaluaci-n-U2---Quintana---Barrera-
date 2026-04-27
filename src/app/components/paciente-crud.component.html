@@ -1,0 +1,178 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h1 class="h3 mb-1">Gestión de Pacientes - Hospital Dr. Sano</h1>
+          <p class="text-muted mb-3">
+            Total: {{ totalPacientes() }}/10 | Cupos disponibles: {{ cupoDisponible() }}
+          </p>
+
+          @if (estaLleno() && !enModoEdicion()) {
+            <div class="alert alert-warning py-2">
+              Aforo máximo alcanzado. No se pueden registrar más pacientes.
+            </div>
+          }
+
+          @if (mensajeError()) {
+            <div class="alert alert-danger py-2">
+              {{ mensajeError() }}
+            </div>
+          }
+
+          <form [formGroup]="pacienteForm" (ngSubmit)="onSubmit()" class="row g-3">
+            <div class="col-12 col-md-4">
+              <label for="id" class="form-label">ID</label>
+              <input id="id" type="text" formControlName="id" class="form-control" />
+              @if (mostrarError('id')) {
+                <small class="text-danger">El ID es obligatorio.</small>
+              }
+            </div>
+
+            <div class="col-12 col-md-8">
+              <label for="nombreCompleto" class="form-label">Nombre completo</label>
+              <input
+                id="nombreCompleto"
+                type="text"
+                formControlName="nombreCompleto"
+                class="form-control"
+              />
+              @if (mostrarError('nombreCompleto')) {
+                <small class="text-danger">Mínimo 4 caracteres.</small>
+              }
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
+              <input
+                id="fechaNacimiento"
+                type="date"
+                formControlName="fechaNacimiento"
+                class="form-control"
+              />
+              @if (mostrarError('fechaNacimiento')) {
+                <small class="text-danger">Ingresa una fecha válida (no futura).</small>
+              }
+              @if (pacienteForm.controls.fechaNacimiento.value) {
+                <small class="text-primary d-block mt-1">
+                  Edad calculada: {{ calcularEdad(pacienteForm.controls.fechaNacimiento.value) }} años
+                </small>
+              }
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input id="telefono" type="text" formControlName="telefono" class="form-control" />
+              @if (mostrarError('telefono')) {
+                <small class="text-danger">Solo números (7 a 15 dígitos).</small>
+              }
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label for="tipoSeguro" class="form-label">Tipo de seguro</label>
+              <input
+                id="tipoSeguro"
+                type="text"
+                formControlName="tipoSeguro"
+                class="form-control"
+              />
+              @if (mostrarError('tipoSeguro')) {
+                <small class="text-danger">Mínimo 3 caracteres.</small>
+              }
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label for="motivoConsulta" class="form-label">Motivo de consulta</label>
+              <input
+                id="motivoConsulta"
+                type="text"
+                formControlName="motivoConsulta"
+                class="form-control"
+              />
+              @if (mostrarError('motivoConsulta')) {
+                <small class="text-danger">Mínimo 5 caracteres.</small>
+              }
+            </div>
+
+            <div class="col-12">
+              <label for="direccion" class="form-label">Dirección</label>
+              <input id="direccion" type="text" formControlName="direccion" class="form-control" />
+              @if (mostrarError('direccion')) {
+                <small class="text-danger">Mínimo 8 caracteres.</small>
+              }
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="!enModoEdicion() && estaLleno()"
+              >
+                {{ enModoEdicion() ? 'Actualizar paciente' : 'Registrar paciente' }}
+              </button>
+              @if (enModoEdicion()) {
+                <button type="button" class="btn btn-secondary" (click)="cancelarEdicion()">
+                  Cancelar edición
+                </button>
+              }
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Nombre completo</th>
+              <th>Fecha de nacimiento</th>
+              <th>Edad</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+              <th>Tipo de seguro</th>
+              <th>Motivo de consulta</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (paciente of pacientes(); track paciente.id) {
+              <tr>
+                <td>{{ paciente.id }}</td>
+                <td>{{ paciente.nombreCompleto }}</td>
+                <td>{{ paciente.fechaNacimiento }}</td>
+                <td>{{ calcularEdad(paciente.fechaNacimiento) }} años</td>
+                <td>{{ paciente.telefono }}</td>
+                <td>{{ paciente.direccion }}</td>
+                <td>{{ paciente.tipoSeguro }}</td>
+                <td>{{ paciente.motivoConsulta }}</td>
+                <td class="text-center">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-warning me-2"
+                    (click)="editarPaciente(paciente)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-danger"
+                    (click)="eliminarPaciente(paciente.id)"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9" class="text-center text-muted py-3">
+                  No hay pacientes registrados.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
